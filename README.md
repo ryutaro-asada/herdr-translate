@@ -1,12 +1,16 @@
 # herdr-translate
 
-A [herdr](https://herdr.dev) plugin that translates English text you select in a
-pane into Japanese with one key, and shows the result in a popup.
+A [herdr](https://herdr.dev) plugin that translates text you select in a pane
+with one key, and shows the result in a popup. It translates English to
+Japanese by default.
 
-Translation runs through macOS's built-in Translate, called from a Shortcuts
-shortcut (`/usr/bin/shortcuts run`). It is free, needs no API key, and works
-offline once the language data is downloaded. [DeepL](https://www.deepl.com/pro-api)
-can be used instead; see [Using DeepL](#using-deepl).
+There are two translation engines:
+
+- `shortcuts` (default): macOS's built-in Translate, called from a Shortcuts
+  shortcut (`/usr/bin/shortcuts run`). It is free, needs no API key, and works
+  offline once the language data is downloaded.
+- `deepl`: the [DeepL API](https://www.deepl.com/pro-api). It needs an API key;
+  see [Using DeepL](#using-deepl).
 
 macOS only. Requires herdr 0.9.5 or later.
 
@@ -16,7 +20,7 @@ macOS only. Requires herdr 0.9.5 or later.
    `ui.copy_on_select = true`, the selection is copied to the clipboard when you
    release the mouse.
 2. Press the key bound to the plugin action (for example `prefix+t`).
-3. A popup shows the Japanese translation, followed by the original text.
+3. A popup shows the translation, followed by the original text.
    Press `q` to close it.
 
 The action uses herdr's `selected_text` when a selection is still active at the
@@ -26,6 +30,9 @@ otherwise the clipboard contents.
 ## Setup
 
 ### 1. Create the shortcut (once)
+
+This step is needed for the `shortcuts` engine only. If you use DeepL, skip it
+and see [Using DeepL](#using-deepl).
 
 In the Shortcuts app, create a shortcut named `herdr-translate`:
 
@@ -82,8 +89,9 @@ description = "translate selection"
 
 ## Configuration
 
-To use a shortcut with a different name, create `config.toml` in the plugin
-config directory (`herdr plugin config-dir ryutaroasada.translate`):
+Settings are read from `config.toml` in the plugin config directory
+(`herdr plugin config-dir ryutaroasada.translate`). The file and every key are
+optional. For example, to use a shortcut with a different name:
 
 ```toml
 shortcut = "My Translate"
@@ -125,25 +133,27 @@ starts, or restart the server after setting it.
 
 Keys ending in `:fx` (DeepL API Free) are sent to
 `https://api-free.deepl.com/v2/translate`; other keys (DeepL API Pro) to
-`https://api.deepl.com/v2/translate`. By default the text is translated from
-English (`EN`) to Japanese (`JA`); set `source_lang` and `target_lang` to
-change this. The key is passed to `curl` on stdin, so it does not
-appear in process listings.
+`https://api.deepl.com/v2/translate`. The key is passed to `curl` on stdin, so
+it does not appear in process listings.
 
-If DeepL fails, the popup shows the error. It does not fall back to Shortcuts.
+The languages are set with `source_lang` and `target_lang`; see
+[Configuration](#configuration).
+
+If DeepL fails, the popup shows the error. It does not fall back to the `shortcuts` engine.
 
 ## Errors
 
 The popup shows a message instead of a translation when:
 
 - there is no selected text and the clipboard is empty,
-- the shortcut does not exist,
-- `shortcuts run` fails or returns no text,
 - `engine` has an unknown value,
-- with `engine = "deepl"`: `DEEPL_API_KEY` is not set, DeepL cannot be
+- with the `shortcuts` engine: the shortcut does not exist, or `shortcuts run`
+  fails or returns no text,
+- with the `deepl` engine: `DEEPL_API_KEY` is not set, DeepL cannot be
   reached, DeepL rejects the key (403), the quota is exceeded (456), there are
-  too many requests (429), another HTTP error occurs (the status and DeepL's
-  message are shown), or the result is empty.
+  too many requests (429), another HTTP error occurs such as an unsupported
+  language code (the status and DeepL's message are shown), or the result is
+  empty.
 
 If the popup cannot open at all (herdr returns `ui_busy` while Settings, Copy
 mode, or another modal is open), a herdr notification is shown instead.
