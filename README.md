@@ -5,7 +5,8 @@ pane into Japanese with one key, and shows the result in a popup.
 
 Translation runs through macOS's built-in Translate, called from a Shortcuts
 shortcut (`/usr/bin/shortcuts run`). It is free, needs no API key, and works
-offline once the language data is downloaded.
+offline once the language data is downloaded. [DeepL](https://www.deepl.com/pro-api)
+can be used instead; see [Using DeepL](#using-deepl).
 
 macOS only. Requires herdr 0.9.5 or later.
 
@@ -88,13 +89,51 @@ config directory (`herdr plugin config-dir ryutaroasada.translate`):
 shortcut = "My Translate"
 ```
 
+| Key        | Default             | Values                                                  |
+|------------|---------------------|---------------------------------------------------------|
+| `engine`   | `"shortcuts"`       | `"shortcuts"` (macOS Shortcuts) or `"deepl"` (DeepL API) |
+| `shortcut` | `"herdr-translate"` | Name of the shortcut used by the `shortcuts` engine     |
+
+## Using DeepL
+
+Set `engine = "deepl"` in `config.toml`:
+
+```toml
+engine = "deepl"
+```
+
+The API key is read from the `DEEPL_API_KEY` environment variable. It is not
+stored in a file and there is no config key for it. Get a key from the
+"API Keys" tab of your DeepL account and export it, for example in `~/.zshrc`:
+
+```sh
+export DEEPL_API_KEY="..."
+```
+
+Plugin commands inherit the environment of the herdr server process, not of
+the shell you press the key in. Export the variable before the herdr server
+starts, or restart the server after setting it.
+
+Keys ending in `:fx` (DeepL API Free) are sent to
+`https://api-free.deepl.com/v2/translate`; other keys (DeepL API Pro) to
+`https://api.deepl.com/v2/translate`. The text is translated from English
+(`EN`) to Japanese (`JA`). The key is passed to `curl` on stdin, so it does not
+appear in process listings.
+
+If DeepL fails, the popup shows the error. It does not fall back to Shortcuts.
+
 ## Errors
 
 The popup shows a message instead of a translation when:
 
 - there is no selected text and the clipboard is empty,
 - the shortcut does not exist,
-- `shortcuts run` fails or returns no text.
+- `shortcuts run` fails or returns no text,
+- `engine` has an unknown value,
+- with `engine = "deepl"`: `DEEPL_API_KEY` is not set, DeepL cannot be
+  reached, DeepL rejects the key (403), the quota is exceeded (456), there are
+  too many requests (429), another HTTP error occurs (the status and DeepL's
+  message are shown), or the result is empty.
 
 If the popup cannot open at all (herdr returns `ui_busy` while Settings, Copy
 mode, or another modal is open), a herdr notification is shown instead.
