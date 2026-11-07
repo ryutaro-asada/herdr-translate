@@ -83,7 +83,7 @@ ${err}"
   case $http_code in
     2??)
       if ! grep -q '[^[:space:]]' "$output" 2>/dev/null; then
-        show "DeepL returned an empty translation."
+        show "The translation was empty (DeepL)."
       fi
       ;;
     403)
@@ -103,7 +103,7 @@ Check your usage in your DeepL account."
 Wait a moment and try again."
       ;;
     *)
-      show "DeepL translation failed (HTTP ${http_code}).
+      show "Translation failed (DeepL, HTTP ${http_code}).
 
 ${message}"
       ;;

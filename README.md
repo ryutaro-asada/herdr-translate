@@ -97,7 +97,7 @@ optional. For example, to use a shortcut with a different name:
 shortcut = "My Translate"
 ```
 
-| Key           | Default             | Values                                                          |
+| Key           | Default             | Description                                                     |
 |---------------|---------------------|-----------------------------------------------------------------|
 | `engine`      | `"shortcuts"`       | `"shortcuts"` (macOS Shortcuts) or `"deepl"` (DeepL API)        |
 | `shortcut`    | `"herdr-translate"` | Name of the shortcut used by the `shortcuts` engine             |
