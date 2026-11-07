@@ -18,6 +18,10 @@ shortcut=$(config_value shortcut)
 shortcut=${shortcut:-$default_shortcut}
 engine=$(config_value engine)
 engine=${engine:-shortcuts}
+source_lang=$(config_value source_lang)
+source_lang=${source_lang:-EN}
+target_lang=$(config_value target_lang)
+target_lang=${target_lang:-JA}
 
 show() {
   printf '%s\n' "$1" > "$page"
@@ -52,8 +56,10 @@ herdr サーバーを起動 (起動中なら再起動) してください。"
   curl_err="$HERDR_PLUGIN_STATE_DIR/curl-error.txt"
   rm -f "$output" "$response"
   umask 077
-  /usr/bin/jq -n --rawfile text "$input" \
-    '{text: [$text], source_lang: "EN", target_lang: "JA"}' > "$request"
+  # source_lang "auto" omits the field so DeepL detects the language.
+  /usr/bin/jq -n --rawfile text "$input" --arg source "$source_lang" --arg target "$target_lang" \
+    '{text: [$text], target_lang: $target} + (if $source == "auto" then {} else {source_lang: $source} end)' \
+    > "$request"
   # The key goes through a curl config on stdin so it never appears in argv.
   http_code=$(printf 'header = "Authorization: DeepL-Auth-Key %s"\n' "$DEEPL_API_KEY" |
     /usr/bin/curl -sS -K - --max-time 30 -X POST \

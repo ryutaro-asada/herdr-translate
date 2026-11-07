@@ -89,10 +89,19 @@ config directory (`herdr plugin config-dir ryutaroasada.translate`):
 shortcut = "My Translate"
 ```
 
-| Key        | Default             | Values                                                  |
-|------------|---------------------|---------------------------------------------------------|
-| `engine`   | `"shortcuts"`       | `"shortcuts"` (macOS Shortcuts) or `"deepl"` (DeepL API) |
-| `shortcut` | `"herdr-translate"` | Name of the shortcut used by the `shortcuts` engine     |
+| Key           | Default             | Values                                                          |
+|---------------|---------------------|-----------------------------------------------------------------|
+| `engine`      | `"shortcuts"`       | `"shortcuts"` (macOS Shortcuts) or `"deepl"` (DeepL API)        |
+| `shortcut`    | `"herdr-translate"` | Name of the shortcut used by the `shortcuts` engine             |
+| `source_lang` | `"EN"`              | DeepL source language code, or `"auto"` to let DeepL detect it  |
+| `target_lang` | `"JA"`              | DeepL target language code (for example `DE`, `ZH`, `EN-US`)    |
+
+`source_lang` and `target_lang` apply only to the `deepl` engine. They are
+passed to DeepL as given; see DeepL's
+[supported languages](https://developers.deepl.com/docs/getting-started/supported-languages).
+An unsupported code makes DeepL return HTTP 400, and the popup shows DeepL's
+message. With the `shortcuts` engine, change the languages in the shortcut's
+Translate Text action in the Shortcuts app.
 
 ## Using DeepL
 
@@ -116,8 +125,9 @@ starts, or restart the server after setting it.
 
 Keys ending in `:fx` (DeepL API Free) are sent to
 `https://api-free.deepl.com/v2/translate`; other keys (DeepL API Pro) to
-`https://api.deepl.com/v2/translate`. The text is translated from English
-(`EN`) to Japanese (`JA`). The key is passed to `curl` on stdin, so it does not
+`https://api.deepl.com/v2/translate`. By default the text is translated from
+English (`EN`) to Japanese (`JA`); set `source_lang` and `target_lang` to
+change this. The key is passed to `curl` on stdin, so it does not
 appear in process listings.
 
 If DeepL fails, the popup shows the error. It does not fall back to Shortcuts.
