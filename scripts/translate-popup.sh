@@ -25,7 +25,7 @@ target_lang=${target_lang:-JA}
 
 show() {
   printf '%s\n' "$1" > "$page"
-  LESSCHARSET=utf-8 less -c -P'q で閉じる' "$page"
+  LESSCHARSET=utf-8 less -c -P'q to close' "$page"
   rm -f "$page"
   exit 0
 }
@@ -39,18 +39,18 @@ $(cat "$input")"
 
 translate_deepl() {
   if [ -z "${DEEPL_API_KEY:-}" ]; then
-    show "環境変数 DEEPL_API_KEY が設定されていません。
+    show "DEEPL_API_KEY is not set.
 
-プラグインは herdr サーバーの環境変数を引き継ぎます。
-~/.zshrc などで export DEEPL_API_KEY=... を設定してから
-herdr サーバーを起動 (起動中なら再起動) してください。"
+Plugins inherit the environment of the herdr server.
+Export DEEPL_API_KEY (for example in ~/.zshrc), then start
+the herdr server, or restart it if it is already running."
   fi
   case $DEEPL_API_KEY in
     *:fx) url="https://api-free.deepl.com/v2/translate" ;;
     *) url="https://api.deepl.com/v2/translate" ;;
   esac
 
-  printf '翻訳中...\n'
+  printf 'Translating...\n'
   request="$HERDR_PLUGIN_STATE_DIR/request.json"
   response="$HERDR_PLUGIN_STATE_DIR/response.json"
   curl_err="$HERDR_PLUGIN_STATE_DIR/curl-error.txt"
@@ -70,7 +70,7 @@ herdr サーバーを起動 (起動中なら再起動) してください。"
   rm -f "$request" "$curl_err"
   if [ "$status" -ne 0 ]; then
     rm -f "$response"
-    show "DeepL に接続できませんでした (curl 終了コード ${status})。
+    show "Could not connect to DeepL (curl exit code ${status}).
 
 ${err}"
   fi
@@ -83,27 +83,27 @@ ${err}"
   case $http_code in
     2??)
       if ! grep -q '[^[:space:]]' "$output" 2>/dev/null; then
-        show "DeepL の翻訳結果が空でした。"
+        show "DeepL returned an empty translation."
       fi
       ;;
     403)
-      show "DeepL が API キーを拒否しました (HTTP 403)。
+      show "DeepL rejected the API key (HTTP 403).
 
-DEEPL_API_KEY の値を確認してください。
-Free プランのキーは末尾が :fx です。"
+Check the value of DEEPL_API_KEY.
+DeepL API Free keys end with :fx."
       ;;
     456)
-      show "DeepL の文字数上限に達しました (HTTP 456)。
+      show "DeepL character quota exceeded (HTTP 456).
 
-DeepL のアカウントで使用量を確認してください。"
+Check your usage in your DeepL account."
       ;;
     429)
-      show "DeepL へのリクエストが多すぎます (HTTP 429)。
+      show "Too many requests to DeepL (HTTP 429).
 
-しばらく待ってから再実行してください。"
+Wait a moment and try again."
       ;;
     *)
-      show "DeepL の翻訳に失敗しました (HTTP ${http_code})。
+      show "DeepL translation failed (HTTP ${http_code}).
 
 ${message}"
       ;;
@@ -113,17 +113,18 @@ ${message}"
 case $engine in
   shortcuts | deepl) ;;
   *)
-    show "engine の値「${engine}」は使えません。
+    show "Unknown engine \"${engine}\".
 
+Set engine in
 $config
-の engine には \"shortcuts\" か \"deepl\" を設定してください。"
+to \"shortcuts\" or \"deepl\"."
     ;;
 esac
 
 if [ -z "$input" ] || ! grep -q '[^[:space:]]' "$input" 2>/dev/null; then
-  show "翻訳するテキストがありません。
+  show "No text to translate.
 
-ペインで英文をマウスで選択してから実行してください。"
+Select text in a pane with the mouse, then try again."
 fi
 
 if [ "$engine" = deepl ]; then
@@ -132,14 +133,14 @@ if [ "$engine" = deepl ]; then
 fi
 
 if ! /usr/bin/shortcuts list | grep -Fqx -- "$shortcut"; then
-  show "ショートカット「${shortcut}」が見つかりません。
+  show "Shortcut \"${shortcut}\" not found.
 
-README の手順でショートカットを作成するか、
+Create it as described in the README, or set shortcut in
 $config
-の shortcut に既存のショートカット名を設定してください。"
+to the name of an existing shortcut."
 fi
 
-printf '翻訳中...\n'
+printf 'Translating...\n'
 rm -f "$output"
 umask 077
 # public.utf8-plain-text makes `shortcuts run` crash with SIGBUS on macOS 26;
@@ -148,16 +149,16 @@ err=$(/usr/bin/shortcuts run "$shortcut" -i "$input" -o "$output" \
   --output-type public.plain-text 2>&1)
 status=$?
 if [ "$status" -ne 0 ]; then
-  show "翻訳に失敗しました (ショートカット「${shortcut}」、終了コード ${status})。
+  show "Translation failed (shortcut \"${shortcut}\", exit code ${status}).
 
 ${err}"
 fi
 if ! grep -q '[^[:space:]]' "$output" 2>/dev/null; then
-  show "翻訳結果が空でした (ショートカット「${shortcut}」)。
+  show "The translation was empty (shortcut \"${shortcut}\").
 
-ショートカットが「テキストを翻訳」(Translate) の入力に
-「ショートカットの入力」(Shortcut Input) を使い、最後に
-「出力を停止して出力」(Stop and output) で翻訳結果を返しているか確認してください。"
+Check that the shortcut's Translate Text action uses
+Shortcut Input, and that it ends with Stop and Output
+returning the translated text."
 fi
 
 show_result
