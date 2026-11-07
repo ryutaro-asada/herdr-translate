@@ -20,6 +20,6 @@ if ! "$herdr" plugin pane open --plugin "$HERDR_PLUGIN_ID" --entrypoint result \
   --env "HERDR_TRANSLATE_INPUT=$input" >/dev/null 2>&1; then
   # Popups are refused (ui_busy) while Settings, Copy mode, or another modal is open.
   "$herdr" notification show "herdr-translate" \
-    --body "Could not open the translation popup. Close Copy mode or other dialogs and try again." >/dev/null 2>&1
+    --body "Could not open the translation popup. Close Settings, Copy mode, or other dialogs and try again." >/dev/null 2>&1
   exit 1
 fi
