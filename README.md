@@ -57,7 +57,7 @@ General → Language & Region → Translation Languages.
 ### 2. Install the plugin
 
 ```sh
-git clone <this repository> ~/repos/herdr-translate
+git clone https://github.com/ryutaro-asada/herdr-translate.git ~/repos/herdr-translate
 herdr plugin link ~/repos/herdr-translate
 herdr plugin action list --plugin ryutaroasada.translate
 ```
