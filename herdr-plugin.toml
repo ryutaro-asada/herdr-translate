@@ -2,7 +2,7 @@ id = "ryutaroasada.translate"
 name = "Translate"
 version = "0.1.0"
 min_herdr_version = "0.9.5"
-description = "Translate selected English text to Japanese with macOS Shortcuts."
+description = "Translate selected English text to Japanese with macOS Shortcuts or DeepL."
 platforms = ["macos"]
 
 [[actions]]
